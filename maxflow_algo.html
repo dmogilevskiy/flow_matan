@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Максимальный поток: остаточная сеть‑2</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDF1F4;--panel:#fff;--ink:#16283B;--mute:#5B6B7B;--line:#C9D3DC;--flow:#0E7C86;--hot:#C77700;--cut:#DCE8FF;--cutline:#2B5FD9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101A24;--panel:#17242F;--ink:#E4ECF2;--mute:#93A4B3;--line:#2B3C4B;--flow:#47C1CC;--hot:#F0B03A;--cut:#20345A;--cutline:#7FA2FF;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101A24;--panel:#17242F;--ink:#E4ECF2;--mute:#93A4B3;--line:#2B3C4B;--flow:#47C1CC;--hot:#F0B03A;--cut:#20345A;--cutline:#7FA2FF;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 "Fira Sans",system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:28px;line-height:1.2;margin:0 0 4px;font-weight:700}
+.sub{margin:0 0 18px;color:var(--mute);max-width:70ch}
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+svg{width:100%;height:auto;display:block}
+.e{fill:none;stroke:var(--mute);stroke-width:2}
+.e.rev{stroke:var(--flow);stroke-dasharray:6 4}
+.e.on{stroke:var(--hot);stroke-width:4.5;stroke-dasharray:none}
+.mk0{fill:var(--mute)}.mk1{fill:var(--flow)}.mk2{fill:var(--hot)}
+.lab{font:600 13px "Fira Sans",sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:5px;stroke-linejoin:round;text-anchor:middle}
+.n{fill:var(--panel);stroke:var(--ink);stroke-width:2}
+.n.st{stroke-width:4}
+.n.a{fill:var(--cut);stroke:var(--cutline)}
+.nl{font:700 15px "Fira Sans",sans-serif;fill:var(--ink);text-anchor:middle;dominant-baseline:central}
+.legend{margin:8px 2px 0;color:var(--mute);font-size:14px}
+.big{font-size:44px;font-weight:700;line-height:1;margin:0}
+.cap{color:var(--mute);font-size:14px;margin:2px 0 12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+button,select{font:600 15px "Fira Sans",sans-serif;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+button.p{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--cutline);outline-offset:2px}
+#st{min-height:3.2em;margin:8px 0}
+ol{margin:8px 0 0;padding-left:22px;max-height:170px;overflow:auto;font-size:14px;color:var(--mute)}
+textarea{width:100%;height:150px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);resize:vertical}
+#err{color:#C0392B;font-size:14px;min-height:1.2em}
+h2{font-size:16px;margin:16px 0 4px}
+.col{display:grid;gap:16px;align-content:start;min-width:0}
+pre{margin:10px 0 0;padding:6px 0;background:var(--bg);border-radius:8px;overflow:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.cl{padding:0 10px 0 6px;border-left:3px solid transparent;white-space:pre}
+.cl i{font-style:normal;color:var(--mute);display:inline-block;width:2.4em;user-select:none}
+.cl.on{background:var(--cut);border-left-color:var(--cutline)}
+.vr{display:flex;gap:2px 18px;flex-wrap:wrap;font:14px/1.7 ui-monospace,Menlo,Consolas,monospace}
+.e.chk{stroke:var(--cutline);stroke-width:5}
+.n.vis{stroke:var(--flow);stroke-width:3.5}
+.n.cd{stroke:var(--hot);stroke-width:4;stroke-dasharray:4 3}
+.n.cu{stroke:var(--cutline);stroke-width:5}
+.gen{align-items:center}
+.gen label{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mute)}
+.gen input{width:4.4em;font:600 15px "Fira Sans",sans-serif;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.gen input:focus-visible{outline:3px solid var(--cutline);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.seg button{border:0;border-radius:0;background:var(--panel)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+<h1>Максимальный поток</h1>
+<p class="sub">Остаточная сеть‑2: берём любой путь из s в t, вычитаем w — наименьшее ребро пути — а на обратных рёбрах прибавляем w. Рёбра с нулевой пропускной способностью исчезают.</p>
+<div class="grid">
+ <div class="col">
+  <div class="box">
+   <svg id="g" viewBox="0 0 770 460" role="img" aria-label="Остаточная сеть"></svg>
+   <p class="legend">Серые рёбра — как в исходной сети, бирюзовые пунктирные — обратные (отмена потока), жёлтые — путь из s в t, синее ребро — то, что обрабатывает текущая строка. Число на ребре — остаточная пропускная способность.</p>
+  </div>
+  <div class="box">
+   <div class="vr" id="vars"></div>
+   <h2>Найденные пути</h2>
+   <ol id="log"></ol>
+  </div>
+ </div>
+ <div class="col">
+  <div class="box">
+   <div class="seg" role="group" aria-label="Режим"><button id="mcode" aria-pressed="true">По коду</button><button id="malgo" aria-pressed="false">Алгоритм</button></div>
+   <p class="big" id="ans">0</p>
+   <p class="cap">ans — величина потока</p>
+   <div class="row"><button class="p" id="step">Шаг</button><button id="iter">Итерация</button><button id="auto">Авто</button><button id="reset">Сначала</button></div>
+   <p class="cap" id="hint" style="margin:0">«Шаг» выполняет одну строку, «Итерация» — до начала следующего поиска пути.</p>
+   <div id="st"></div>
+   <pre id="code" aria-label="Код алгоритма"></pre>
+  </div>
+  <div class="box">
+   <h2 style="margin-top:0">Своя сеть</h2>
+   <p class="cap" style="margin-bottom:6px">Первая строка — источник и сток, дальше рёбра «откуда куда пропускная_способность» (целые числа).</p>
+   <div class="row gen"><label>Вершин <input id="gn" type="number" min="2" max="14" value="8"></label><label>Рёбер <input id="gm" type="number" min="1" max="157" value="14"></label><label>Макс. c <input id="gc" type="number" min="1" max="99" value="20"></label><button id="gen">Сгенерировать</button></div>
+   <textarea id="txt" spellcheck="false"></textarea>
+   <div class="row"><button id="apply">Применить</button></div>
+   <div id="err"></div>
+  </div>
+ </div>
+</div>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const EX="s t\ns a 16\ns b 13\na b 10\nb a 4\na c 12\nc b 9\nb d 14\nd c 7\nc t 20\nd t 4";
+const PRE={s:[70,230],a:[250,90],b:[250,370],c:[500,90],d:[500,370],t:[700,230]};
+const R=20;
+let n,names,S,T,cap,r,pos,ans,done,timer,log,E,gen,cur,w,cu,cv,par,q;
+
+function parse(txt){
+  const L=txt.split("\n").map(x=>x.trim()).filter(Boolean);
+  const h=(L[0]||"").split(/\s+/);
+  if(h.length<2)throw "Первая строка: источник и сток, например «s t»";
+  names=[];
+  const id=x=>{if(!/^[\wА-Яа-яЁё]+$/.test(x))throw "Имя вершины «"+x+"»: только буквы, цифры и _";let i=names.indexOf(x);if(i<0){names.push(x);i=names.length-1}return i};
+  S=id(h[0]);T=id(h[1]);
+  if(S===T)throw "Источник и сток должны быть разными вершинами";
+  E=[];
+  for(const l of L.slice(1)){
+    const p=l.split(/\s+/),c=+p[2];
+    if(p.length<3||!Number.isInteger(c)||c<=0)throw "Строка «"+l+"»: нужно «u v c», c — целое число больше 0";
+    const u=id(p[0]),v=id(p[1]);
+    if(u!==v)E.push([u,v,c]);
+  }
+  n=names.length;
+  if(n>14)throw "Для наглядности не больше 14 вершин";
+  cap=Array.from({length:n},()=>Array(n).fill(0));
+  for(const[u,v,c]of E)cap[u][v]+=c;
+  layout();
+}
+function layout(){
+  if(names.every(x=>PRE[x])){pos=names.map(x=>PRE[x]);return}
+  const d=Array(n).fill(-1);d[S]=0;const q=[S];
+  for(let i=0;i<q.length;i++){const u=q[i];for(let v=0;v<n;v++)if((cap[u][v]||cap[v][u])&&d[v]<0){d[v]=d[u]+1;q.push(v)}}
+  let m=1;for(let v=0;v<n;v++)if(v!==T)m=Math.max(m,d[v]);
+  for(let v=0;v<n;v++)if(d[v]<0)d[v]=m;
+  d[T]=m+1;
+  const by={};d.forEach((l,v)=>(by[l]??=[]).push(v));
+  pos=[];
+  for(const l in by)by[l].forEach((v,i)=>pos[v]=[70+630*(+l)/(m+1),460*(i+1)/(by[l].length+1)]);
+}
+const CODE=`def max_flow(n, edges, s, t):
+    r = [[0] * n for _ in range(n)]
+    for u, v, c in edges:
+        r[u][v] += c
+    ans = 0
+    while True:
+        par = [-2] * n
+        par[s] = -1
+        q = deque([s])
+        while q and par[t] == -2:
+            u = q.popleft()
+            for v in range(n):
+                if r[u][v] > 0 and par[v] == -2:
+                    par[v] = u
+                    q.append(v)
+        if par[t] == -2:
+            return ans
+        w, v = float("inf"), t
+        while v != s:
+            w = min(w, r[par[v]][v])
+            v = par[v]
+        v = t
+        while v != s:
+            u = par[v]
+            r[u][v] -= w
+            r[v][u] += w
+            v = u
+        ans += w`.split("\n");
+const DESC=["","","Остаточная сеть пока пустая: везде 0.","Берём следующее ребро исходной сети.","Добавляем его пропускную способность в r.","Поток пока равен 0.","Начинаем поиск пути из s в t.","Ни одна вершина ещё не посещена.","Из s начинаем поиск.","В очередь кладём s.","Продолжаем, пока очередь не пуста и t не достигнут.","Берём вершину u из очереди.","Перебираем вершину v.","Есть ли ребро u → v с r > 0, и v ещё не посещена?","Запоминаем: в v пришли из u.","v кладём в очередь.","Дошли до t?","Пути нет — поток максимален.","Идём от t назад и ищем наименьшее ребро w.","Дошли до s?","Уменьшаем w до r на ребре par[v] → v, если оно меньше.","Шаг назад по пути.","Снова идём от t, теперь меняем рёбра.","Дошли до s?","u — предыдущая вершина на пути.","Вычитаем w на ребре u → v.","Прибавляем w на обратном ребре v → u.","Шаг назад по пути.","Прибавляем w к ответу."];
+function* run(){
+  r=cap.map(x=>x.map(()=>0));ans=0;w=null;cu=null;cv=null;par=null;q=[];log=[];
+  yield 2;
+  for(const[a,b,c]of E){yield 3;cu=a;cv=b;yield 4;r[a][b]+=c}
+  yield 5;ans=0;
+  while(true){
+    yield 6;
+    yield 7;par=Array(n).fill(-2);
+    yield 8;par[S]=-1;
+    yield 9;q=[S];
+    for(;;){
+      yield 10;
+      if(!(q.length&&par[T]===-2))break;
+      yield 11;cu=q.shift();
+      for(cv=0;cv<n;cv++){
+        yield 12;
+        yield 13;
+        if(r[cu][cv]>0&&par[cv]===-2){yield 14;par[cv]=cu;yield 15;q.push(cv)}
+      }
+      cv=n-1;
+    }
+    yield 16;
+    if(par[T]===-2){yield 17;return}
+    yield 18;w=Infinity;cv=T;
+    for(;;){yield 19;if(cv===S)break;yield 20;w=Math.min(w,r[par[cv]][cv]);yield 21;cv=par[cv]}
+    yield 22;cv=T;
+    for(;;){yield 23;if(cv===S)break;yield 24;cu=par[cv];yield 25;r[cu][cv]-=w;yield 26;r[cv][cu]+=w;yield 27;cv=cu}
+    yield 28;ans+=w;log.push(`${fmt(chain())}: w = ${w}, ans = ${ans}`);
+  }
+}
+const fmt=p=>p.map(v=>names[v]).join(" → ");
+const nm=x=>x==null?"—":names[x];
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function chain(){
+  if(!par||par[T]===-2)return null;
+  const p=[];for(let x=T;x!==-1;x=par[x])p.push(x);
+  return p.reverse();
+}
+function advance(){
+  if(done)return;
+  const x=gen.next();
+  if(x.done)done=true;else cur=x.value;
+}
+function stopAuto(){clearInterval(timer);timer=null;$("#auto").textContent="Авто"}
+function reset(){stopAuto();gen=run();done=false;cur=0;advance();if(mode==="algo")while(!done&&cur!==6)advance();draw()}
+function draw(){
+  const p=cur>=16&&cur<=28?chain():null;
+  const onP=(a,b)=>p&&p.some((x,i)=>x===a&&p[i+1]===b);
+  let chk=null;
+  if(cur>=13&&cur<=15)chk=[cu,cv];
+  else if(cur===20&&par)chk=[par[cv],cv];
+  else if(cur===25)chk=[cu,cv];
+  else if(cur===26)chk=[cv,cu];
+  let s=`<defs>${[0,1,2].map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="mk${k}" d="M0 0L10 5L0 10z"/></marker>`).join("")}</defs>`;
+  let labels="";
+  for(let u=0;u<n;u++)for(let v=0;v<n;v++){
+    if(!(r[u][v]>0))continue;
+    const[x1,y1]=pos[u],[x2,y2]=pos[v],dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1;
+    const cx=(x1+x2)/2-dy/len*18,cy=(y1+y2)/2+dx/len*18;
+    const ux=cx-x1,uy=cy-y1,ul=Math.hypot(ux,uy)||1;
+    const sx=x1+ux/ul*R,sy=y1+uy/ul*R;
+    const vx=x2-cx,vy=y2-cy,vl=Math.hypot(vx,vy)||1;
+    const ex=x2-vx/vl*(R+3),ey=y2-vy/vl*(R+3);
+    const on=onP(u,v),fwd=cap[u][v]>0,ck=chk&&chk[0]===u&&chk[1]===v;
+    s+=`<path class="e${fwd?"":" rev"}${on?" on":""}${ck?" chk":""}" d="M${sx} ${sy}Q${cx} ${cy} ${ex} ${ey}" marker-end="url(#m${on?2:fwd?0:1})"/>`;
+    labels+=`<text class="lab" x="${.25*sx+.5*cx+.25*ex}" y="${.25*sy+.5*cy+.25*ey+4}">${r[u][v]}</text>`;
+  }
+  s+=labels;
+  const seen=par&&cur>=8&&cur<=16;
+  for(let v=0;v<n;v++){
+    const reached=par&&par[v]!==-2;
+    const cls="n"+(v===S||v===T?" st":"")+(done&&reached?" a":"")+(seen&&reached?" vis":"")+(cur>=11&&cur<=15&&v===cu?" cu":"")+(cur>=12&&cur<=15&&v===cv?" cd":"");
+    s+=`<circle class="${cls}" cx="${pos[v][0]}" cy="${pos[v][1]}" r="${R}"/><text class="nl" x="${pos[v][0]}" y="${pos[v][1]}">${names[v]}</text>`;
+  }
+  $("#g").innerHTML=s;
+  $("#ans").textContent=ans;
+  const wv=w==null?"—":w===Infinity?"∞":w;
+  $("#vars").innerHTML=`<span>w = ${wv}</span><span>u = ${nm(cu)}</span><span>v = ${nm(cv)}</span><span>q = [${q.map(nm).join(", ")}]</span><span>par = ${par?names.map((x,i)=>x+":"+(par[i]===-2?"—":par[i]===-1?"−1":names[par[i]])).join(" "):"—"}</span>`;
+  $("#log").innerHTML=log.map(x=>`<li>${x}</li>`).join("");
+  $("#log").scrollTop=1e9;
+  $("#code").innerHTML=CODE.map((l,i)=>`<div class="cl${cur===i+1?" on":""}"><i>${i+1}</i>${esc(l)}</div>`).join("");
+  const on=$("#code").querySelector&&$("#code").querySelector(".on");
+  if(on&&on.scrollIntoView)on.scrollIntoView({block:"nearest"});
+  let t=DESC[cur]||"";
+  if(mode==="algo"){
+    const pp=chain();
+    t=cur===18&&pp?`Найден путь ${fmt(pp)}, наименьшее ребро w = ${Math.min(...pp.slice(1).map((v,i)=>r[pp[i]][v]))}. Следующий «Шаг» вычтет w на пути и прибавит на обратных рёбрах.`:log.length?"Ищем следующий путь.":"«Шаг» найдёт путь из s в t в остаточной сети.";
+  }
+  if(done){
+    let c=0;for(let x=0;x<n;x++)for(let y=0;y<n;y++)if(par[x]!==-2&&par[y]===-2)c+=cap[x][y];
+    t=`Пути из ${names[S]} в ${names[T]} больше нет, максимальный поток = ${ans}. Вершины, достижимые из ${names[S]} (синие), образуют A = {${names.filter((_,v)=>par[v]!==-2).join(", ")}}, пропускная способность разреза [A, B] = ${c}.`;
+  }
+  $("#st").textContent=t;
+}
+let mode="code";
+function tick(){
+  if(mode==="code")advance();
+  else if(!done){
+    if(cur===18){do{advance()}while(!done&&cur!==6)}
+    else{do{advance()}while(!done&&cur!==18)}
+  }
+  draw();if(done)stopAuto();
+}
+function setMode(m){
+  mode=m;const c=m==="code";
+  $("#mcode").setAttribute("aria-pressed",c);$("#malgo").setAttribute("aria-pressed",!c);
+  $("#code").hidden=!c;$("#vars").hidden=!c;$("#iter").hidden=!c;
+  $("#hint").textContent=c?"«Шаг» выполняет одну строку, «Итерация» — до начала следующего поиска пути.":"«Шаг» сначала находит путь, следующий «Шаг» применяет его к остаточной сети.";
+  reset();
+}
+$("#mcode").onclick=()=>setMode("code");$("#malgo").onclick=()=>setMode("algo");
+$("#step").onclick=tick;
+$("#iter").onclick=()=>{do{advance()}while(!done&&cur!==6);draw();if(done)stopAuto()};
+$("#auto").onclick=()=>{
+  if(timer){stopAuto();return}
+  if(done)return;
+  $("#auto").textContent="Пауза";
+  timer=setInterval(tick,mode==="code"?400:900);
+};
+$("#reset").onclick=reset;
+$("#apply").onclick=()=>{
+  try{parse($("#txt").value);$("#err").textContent="";reset()}catch(e){$("#err").textContent=String(e)}
+};
+const rnd=k=>Math.floor(Math.random()*k);
+function genText(nv,m,mc){
+  const lab=["s",..."abcdefghijkl".slice(0,nv-2).split(""),"t"],tt=nv-1;
+  const inner=[...Array(nv-2).keys()].map(i=>i+1);
+  for(let i=inner.length-1;i>0;i--){const j=rnd(i+1);[inner[i],inner[j]]=[inner[j],inner[i]]}
+  const seen=new Set(),out=[];
+  const add=(u,v)=>{const k=u*nv+v;if(u===v||v===0||u===tt||seen.has(k))return;seen.add(k);out.push([u,v])};
+  const placed=[0];
+  for(const v of inner){add(placed[rnd(placed.length)],v);placed.push(v)}
+  add(placed[rnd(placed.length)],tt);
+  m=Math.min(Math.max(m,out.length),(nv-1)*(nv-2)+1);
+  while(out.length<m)add(rnd(nv),rnd(nv));
+  return "s t\n"+out.map(([u,v])=>`${lab[u]} ${lab[v]} ${1+rnd(mc)}`).join("\n");
+}
+$("#gen").onclick=()=>{
+  const g=(id,lo,hi,d)=>{const x=Math.round(+$(id).value);const y=Number.isFinite(x)?Math.min(hi,Math.max(lo,x)):d;$(id).value=y;return y};
+  const nv=g("#gn",2,14,8),m=g("#gm",1,(nv-1)*(nv-2)+1,14),mc=g("#gc",1,99,20);
+  const t=genText(nv,m,mc);
+  $("#gm").value=t.split("\n").length-1;
+  $("#txt").value=t;
+  $("#apply").onclick();
+};
+$("#txt").value=EX;parse(EX);reset();
+</script>
+</body>
+</html>
